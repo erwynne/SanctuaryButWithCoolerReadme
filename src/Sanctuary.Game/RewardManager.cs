@@ -4,14 +4,18 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using System.Collections.Generic;
+using Sanctuary.Core.Collections;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Rewards;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
+
 
 namespace Sanctuary.Game;
 
@@ -43,6 +47,49 @@ public class RewardManager : IRewardManager
         return true;
     }
 
+    public bool TryRollRewardUnowned(Player player, string rewardTableKey, out RewardDropDefinition? drop, out int tint)
+    {
+        drop = null;
+        tint = 0;
+
+        if (!_resourceManager.RewardTables.TryGetValue(rewardTableKey.Trim().ToLowerInvariant(), out var table))
+        {
+            _logger.LogError("Unknown reward table {key}.", rewardTableKey);
+            return false;
+        }
+
+        var winnable = table.DropTable.Where(x => IsWinnable(player, x)).ToList();
+
+        if (winnable.Count == 0)
+        {
+            _logger.LogWarning("{player} owns everything in {key} but tried to roll a reward.", player.Name.FullName, rewardTableKey);
+            return false;
+        }
+
+        drop = new WeightedDropTable<RewardDropDefinition>(winnable).SelectRandom();
+
+        if (drop is ItemRewardDropDefinition item)
+            tint = PickTint(player, item);
+
+        return true;
+    }
+
+    private int PickTint(Player player, ItemRewardDropDefinition item)
+    {
+        if (item.Tints.Count == 0)
+            return 0;
+
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(item.ItemDefinitionId, out var itemDefinition))
+            return 0;
+
+        if (itemDefinition.Type != 19)
+            return new WeightedDropTable<TintDropDefinition>(item.Tints).SelectRandom().TintId;
+
+        var unownedTints = item.Tints.Where(x => !OwnsMount(player, itemDefinition.Param1, x.TintId)).ToList();
+
+        return new WeightedDropTable<TintDropDefinition>(unownedTints).SelectRandom().TintId;
+    }
+
     public bool TryGrantReward(Player player, RewardDropDefinition drop, ulong sourceGuid = 0)
     {
         return drop switch
@@ -65,6 +112,15 @@ public class RewardManager : IRewardManager
             return false;
         }
 
+         if (itemDefinition.Type == 19)
+         {
+          if (!TryGrantMount(player, itemDefinition.Param1, tint))
+            return false;
+
+          SendMountRewardToast(player, itemDefinition, tint, quantity, sourceGuid);
+          return true;
+         }
+        
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
@@ -132,6 +188,89 @@ public class RewardManager : IRewardManager
         return true;
     }
 
+     private bool TryGrantMount(Player player, int mountDefinitionId, int tint)
+        {
+        if (!_resourceManager.Mounts.TryGetValue(mountDefinitionId, out var mountDefinition))
+                {
+                    _logger.LogError("Cannot grant unknown mount definition of {mountDefinitionId}.", mountDefinitionId);
+                    return false;
+                }
+
+        var characterId = GuidHelper.GetPlayerId(player.Guid);
+        
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var dbCharacter = dbContext.Characters
+            .Include(character => character.Mounts)
+            .SingleOrDefault(character => character.Id == characterId);
+        if (dbCharacter is null)
+            return false;
+        if (dbCharacter.Mounts.Any(x => x.Definition == mountDefinitionId && x.Tint == tint))
+                {
+                    _logger.LogWarning("Cannot grant duplicate mount definition of {mountDefinitionId} with tint {tint}, {player} already owns one.", mountDefinitionId, tint, player.Name.FullName);
+                    return false;
+                }
+        
+        var lastMountId = dbCharacter.Mounts.Count > 0 ? dbCharacter.Mounts.Max(x => x.Id) : 0;
+
+         var dbMount = new DbMount
+                {
+                    Id = ++lastMountId,
+
+                    Tint = tint,
+                    Definition = mountDefinitionId,
+                    IsUpgraded = mountDefinition.IsUpgradable // TODO: Implement training
+                };
+
+                dbCharacter.Mounts.Add(dbMount);
+        if (dbContext.SaveChanges() <= 0)
+            return false;
+
+        player.Mounts.Add(new PacketMountInfo
+            {
+                Id = dbMount.Id,
+                Definition = mountDefinitionId,
+                NameId = mountDefinition.NameId,
+                ImageSetId = mountDefinition.ImageSetId,
+                TintId = tint,
+                TintAlias = mountDefinition.TintAlias,
+                MembersOnly = mountDefinition.MembersOnly,
+                IsUpgradable = mountDefinition.IsUpgradable,
+                IsUpgraded = dbMount.IsUpgraded
+            }
+            );
+        
+        var packetMountList = new PacketMountList
+            {
+                Mounts = player.Mounts
+            };
+
+        player.SendTunneled(packetMountList);
+        return true;
+        }
+
+    private bool IsWinnable(Player player, RewardDropDefinition drop)
+    {
+        if (drop is not ItemRewardDropDefinition item)
+            return true;
+
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(item.ItemDefinitionId, out var itemDefinition))
+        {
+            return false;
+        }
+
+        if (itemDefinition.Type is not 19)
+            return true;
+        
+        if (item.Tints.Count == 0)
+            return !OwnsMount(player, itemDefinition.Param1, 0);
+    
+        return item.Tints.Any(x => !OwnsMount(player, itemDefinition.Param1, x.TintId));
+    }
+    private static bool OwnsMount(Player player, int mountDefinitionId, int tint)
+    {
+        return player.Mounts.Any(x => x.Definition == mountDefinitionId && x.TintId == tint);
+    }
+
     public bool TryGrantCurrency(Player player, CurrencyType currencyType, int amount)
     {
         if (amount <= 0)
@@ -184,6 +323,43 @@ public class RewardManager : IRewardManager
             Tint = clientItem.Tint,
             Quantity = quantity,
             ItemGuid = clientItem.Id
+        });
+
+        player.SendTunneled(packet);
+    }
+    private static void SendMountRewardToast(Player player, ClientItemDefinition itemDefinition, int tint, int quantity, ulong sourceGuid)
+    //Answer to TODO: Yes, but we only know this one right now. Unknown1 appears to be part of Coins & XP Toasts. -Erwynne
+    {
+         var clientItemDefinitions = new List<ClientItemDefinition> {itemDefinition};
+
+        using var writer = new PacketWriter();
+
+        writer.Write(clientItemDefinitions);
+
+        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions();
+
+        playerUpdatePacketItemDefinitions.Payload = writer.Buffer;
+
+        player.SendTunneled(playerUpdatePacketItemDefinitions);
+
+        var notificationId = Environment.TickCount & int.MaxValue;
+
+        var packet = new RewardBundlePacket
+        {
+            Unknown8 = itemDefinition.DescriptionId
+        };
+        packet.RewardBundle.SourceGuid = sourceGuid ^ (uint)notificationId;
+        packet.RewardBundle.PlayerGuid = player.Guid;
+        packet.RewardBundle.IconId = itemDefinition.Icon.Id;
+        packet.RewardBundle.NameId = itemDefinition.NameId;
+        packet.RewardBundle.Unknown3 = 16; //16 gives a mystery box panel
+        packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
+        {
+            IconId = itemDefinition.Icon.Id,
+            NameId = itemDefinition.NameId,
+            DefinitionId = itemDefinition.Id,
+            TintId = itemDefinition.Icon.TintId,
+            Quantity = quantity,
         });
 
         player.SendTunneled(packet);

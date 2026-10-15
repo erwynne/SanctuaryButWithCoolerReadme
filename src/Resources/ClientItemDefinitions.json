@@ -1265038,7 +1265038,7 @@
     "TextureAlias": "freestyle-lava-M",
     "MemberDiscount": 10,
     "Slot": 5,
-    "ModelName": "freestyle_<race>_<gender>_feet_jetbootprecursor.adr",
+    "ModelName": "freestyle_<race>_<gender>_feet_jetbootlava.adr",
     "CategoryId": 105,
     "IsTintable": true,
     "ResellValue": 0
@@ -1265062,7 +1265062,7 @@
     "TextureAlias": "freestyle-lava-M",
     "MemberDiscount": 10,
     "Slot": 5,
-    "ModelName": "freestyle_<race>_<gender>_feet_jetbootprecursor.adr",
+    "ModelName": "freestyle_<race>_<gender>_feet_jetbootlava.adr",
     "CategoryId": 105,
     "IsTintable": true,
     "ResellValue": 0
@@ -1265086,7 +1265086,7 @@
     "TextureAlias": "freestyle-lava-M",
     "MemberDiscount": 10,
     "Slot": 5,
-    "ModelName": "freestyle_<race>_<gender>_feet_jetbootprecursor.adr",
+    "ModelName": "freestyle_<race>_<gender>_feet_jetbootlava.adr",
     "CategoryId": 105,
     "IsTintable": true,
     "ResellValue": 0
@@ -1269823,5 +1269823,23 @@
     "NoSale": true,
     "Rarity": 3,
     "IsTintable": true
+  },
+  //chest test :)
+  {
+    "Comment": "Mystery Chest",
+    "Id": 78136,
+    "Type": 28,
+    "NameId": 436403,
+    "DescriptionId": 3858,
+    "Icon": {
+      "Id":7666
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
   }
 ]

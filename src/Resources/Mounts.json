@@ -614,5 +614,16 @@
     "Stats": {
       "MaxMovementSpeed": 12.5
     }
+  },
+  {
+    "Comment": "Kangaroo",
+    "Id": 895,
+    "NameId": 378,
+    "ImageSetId": 7665,
+    "TintAlias": "kangaroo-red",
+    "ModelId": 3870,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
   }
 ]

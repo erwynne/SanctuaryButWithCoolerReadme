@@ -8,10 +8,11 @@ public sealed class RewardBundleBase : ISerializableType
 {
     // This payload is shared by RewardBundlePacket and the reward embedded in client collection data.
     public bool Success = true;
-    public int Unknown1;
+    public int Unknown1; // This gives you 16 stars and 16 coins visually without actually giving you them if set to 16.. I heard that the pattern is
+    // 16 | 0, 0 | 16, I need to look into it further to confirm or deny
     public int RewardKind;
     public int Unknown2;
-    public int Unknown3 = 3;
+    public int Unknown3 = 3; // This gives you a box reward with "OK" popup if set to 16
     public int Unknown4;
     public int Unknown5;
     public float Multiplier = 1.0f;

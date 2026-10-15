@@ -20787,5 +20787,40 @@
     "Name": "Snowhill Warpstone",
     "ModelId": 280,
     "ModelFileName": "sg_warpstone_01.adr"
+  },
+  {
+    "Id": 33085,
+    "NameId": 19048,
+    "Name": "Clockwork Mystery Chest",
+    "ModelId": 876,
+    "ModelFileName": "sg_mystery_chest_03.adr"
+  },
+  {
+    "Id": 33086,
+    "NameId": 436403,
+    "Name": "Mystery Chest",
+    "ModelId": 1511,
+    "ModelFileName": "sg_mystery_chest_01.adr"
+  },
+  {
+    "Id": 33087,
+    "NameId": 2662,
+    "Name": "Sci-Fi Mystery Chest",
+    "ModelId": 1512,
+    "ModelFileName": "sg_mystery_chest_02.adr"
+  },
+  {
+    "Id": 33088,
+    "NameId": 4419440,
+    "Name": "Snow Days Mystery Chest",
+    "ModelId": 4135,
+    "ModelFileName": "sg_mystery_chest_04.adr"
+  },
+  {
+    "Id": 33089,
+    "NameId": 442890,
+    "Name": "Wonders Mystery Chest",
+    "ModelId": 4460,
+    "ModelFileName": "sg_mystery_chest_05.adr"
   }
 ]

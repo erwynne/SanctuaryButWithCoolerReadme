@@ -25,5 +25,89 @@
                 "Weight": 1
             }
         ]
+    },
+    {
+              "Key": "mystery-test",
+              "DropTable": [ 
+            { 
+                "RewardType": "Item",
+                "ItemDefinitionId": 78136,
+                "Weight": 1,
+                "Quantity": 1 
+            }
+        ]
+    },
+    { 
+      "Key": "mystery-chest-drops",
+      "DropTable": [
+            { 
+                "RewardType": "Item",
+                "ItemDefinitionId": 78142,
+                "Weight": 1,
+                "Quantity": 1 
+            },
+            { 
+                "RewardType": "Item",
+                "ItemDefinitionId": 78143,
+                "Weight": 1,
+                "Quantity": 1 
+            },
+            { 
+                "RewardType": "Item",
+                "ItemDefinitionId": 79373,
+                "Weight": 1,
+                "Quantity": 1 
+            },
+            { 
+                "RewardType": "Item",
+                "ItemDefinitionId": 79370,
+                "Weight": 1,
+                "Quantity": 1 
+            },
+            { 
+                "RewardType": "Item",
+                "ItemDefinitionId": 78139,
+                "Weight": 1,
+                "Quantity": 1 
+            },
+            { 
+                "RewardType": "Item",
+                "ItemDefinitionId": 78144,
+                "Weight": 1,
+                "Quantity": 1 
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 11584,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 553,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1 
+            }
+        ] 
+    },
+    { "Key": "kangaroo-test",
+      "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 11584,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 553,
+                        "Weight": 1
+                    },
+                    {
+                        "TintId": 553,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1 
+            }
+        ] 
     }
 ]
