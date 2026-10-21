@@ -1,8 +1,12 @@
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Resources.Definitions.Rewards;
 
 namespace Sanctuary.Game.ChatCommands;
 
+/// <summary>
+/// Uses rewards defined in Rewards.json
+/// </summary>
 public class RewardChatCommand : IChatCommand
 {
     private readonly IChatCommandManager _chatCommandManager;
@@ -26,13 +30,17 @@ public class RewardChatCommand : IChatCommand
 
         var tableKey = args[0];
 
-        if (!_rewardManager.TryRollReward(tableKey, out var drop) || drop is null)
+        if (!_rewardManager.TryRollRewardUnowned(invoker, tableKey, out var drop, out var tint) || drop is null)
         {
-            ChatHelper.SendSystemMessage(invoker, $"Unknown reward table '{tableKey}'.");
+            ChatHelper.SendSystemMessage(invoker, $"Nothing left to win in '{tableKey}'.");
             return true;
         }
 
-        if (!_rewardManager.TryGrantReward(invoker, drop))
+        var granted = drop is ItemRewardDropDefinition item
+            ? _rewardManager.TryGrantItem(invoker, item.ItemDefinitionId, tint, item.Quantity)
+            : _rewardManager.TryGrantReward(invoker, drop);
+
+        if (!granted)
         {
             ChatHelper.SendSystemMessage(invoker, "Failed to grant the rolled reward.");
             return true;

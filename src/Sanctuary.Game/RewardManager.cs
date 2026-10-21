@@ -1,16 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-using System.Collections.Generic;
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Rewards;
 using Sanctuary.Packet;
@@ -76,14 +77,26 @@ public class RewardManager : IRewardManager
 
     private int PickTint(Player player, ItemRewardDropDefinition item)
     {
-        if (item.Tints.Count == 0)
-            return 0;
-
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(item.ItemDefinitionId, out var itemDefinition))
             return 0;
 
-        if (itemDefinition.Type != 19)
+        if (itemDefinition.Type != ItemDefinitionHelper.MountItemType)
+        {
+            if (item.Tints.Count == 0)
+            {
+                if (item.TintGroupId != 0
+                    && _resourceManager.TintGroups.TryGetValue(item.TintGroupId, out var groupTints)
+                    && groupTints.Count > 0)
+                    return groupTints[Random.Shared.Next(groupTints.Count)];
+
+                return 0;
+            }
+
             return new WeightedDropTable<TintDropDefinition>(item.Tints).SelectRandom().TintId;
+        }
+
+        if (item.Tints.Count == 0)
+            return GetDefaultMountTint(itemDefinition.Param1);
 
         var unownedTints = item.Tints.Where(x => !OwnsMount(player, itemDefinition.Param1, x.TintId)).ToList();
 
@@ -112,15 +125,24 @@ public class RewardManager : IRewardManager
             return false;
         }
 
-         if (itemDefinition.Type == 19)
-         {
-          if (!TryGrantMount(player, itemDefinition.Param1, tint))
-            return false;
+        if (itemDefinition.Type == ItemDefinitionHelper.PetItemType)
+        {
+            if (!TryGrantPet(player, itemDefinition, tint))
+                return false;
 
-          SendMountRewardToast(player, itemDefinition, tint, quantity, sourceGuid);
-          return true;
-         }
-        
+            SendMountRewardToast(player, itemDefinition, tint, quantity, sourceGuid);
+            return true;
+        }
+
+        if (itemDefinition.Type == ItemDefinitionHelper.MountItemType)
+        {
+            if (!TryGrantMount(player, itemDefinition.Param1, tint))
+                return false;
+
+            SendMountRewardToast(player, itemDefinition, tint, quantity, sourceGuid);
+            return true;
+        }
+
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
@@ -188,16 +210,16 @@ public class RewardManager : IRewardManager
         return true;
     }
 
-     private bool TryGrantMount(Player player, int mountDefinitionId, int tint)
-        {
+    private bool TryGrantMount(Player player, int mountDefinitionId, int tint)
+    {
         if (!_resourceManager.Mounts.TryGetValue(mountDefinitionId, out var mountDefinition))
-                {
-                    _logger.LogError("Cannot grant unknown mount definition of {mountDefinitionId}.", mountDefinitionId);
-                    return false;
-                }
+        {
+            _logger.LogError("Cannot grant unknown mount definition of {mountDefinitionId}.", mountDefinitionId);
+            return false;
+        }
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);
-        
+
         using var dbContext = _dbContextFactory.CreateDbContext();
         var dbCharacter = dbContext.Characters
             .Include(character => character.Mounts)
@@ -205,48 +227,48 @@ public class RewardManager : IRewardManager
         if (dbCharacter is null)
             return false;
         if (dbCharacter.Mounts.Any(x => x.Definition == mountDefinitionId && x.Tint == tint))
-                {
-                    _logger.LogWarning("Cannot grant duplicate mount definition of {mountDefinitionId} with tint {tint}, {player} already owns one.", mountDefinitionId, tint, player.Name.FullName);
-                    return false;
-                }
-        
+        {
+            _logger.LogWarning("Cannot grant duplicate mount definition of {mountDefinitionId} with tint {tint}, {player} already owns one.", mountDefinitionId, tint, player.Name.FullName);
+            return false;
+        }
+
         var lastMountId = dbCharacter.Mounts.Count > 0 ? dbCharacter.Mounts.Max(x => x.Id) : 0;
 
-         var dbMount = new DbMount
-                {
-                    Id = ++lastMountId,
+        var dbMount = new DbMount
+        {
+            Id = ++lastMountId,
 
-                    Tint = tint,
-                    Definition = mountDefinitionId,
-                    IsUpgraded = mountDefinition.IsUpgradable // TODO: Implement training
-                };
+            Tint = tint,
+            Definition = mountDefinitionId,
+            IsUpgraded = mountDefinition.IsUpgradable // TODO: Implement training
+        };
 
-                dbCharacter.Mounts.Add(dbMount);
+        dbCharacter.Mounts.Add(dbMount);
         if (dbContext.SaveChanges() <= 0)
             return false;
 
         player.Mounts.Add(new PacketMountInfo
-            {
-                Id = dbMount.Id,
-                Definition = mountDefinitionId,
-                NameId = mountDefinition.NameId,
-                ImageSetId = mountDefinition.ImageSetId,
-                TintId = tint,
-                TintAlias = mountDefinition.TintAlias,
-                MembersOnly = mountDefinition.MembersOnly,
-                IsUpgradable = mountDefinition.IsUpgradable,
-                IsUpgraded = dbMount.IsUpgraded
-            }
+        {
+            Id = dbMount.Id,
+            Definition = mountDefinitionId,
+            NameId = mountDefinition.NameId,
+            ImageSetId = mountDefinition.ImageSetId,
+            TintId = tint,
+            TintAlias = mountDefinition.TintAlias,
+            MembersOnly = mountDefinition.MembersOnly,
+            IsUpgradable = mountDefinition.IsUpgradable,
+            IsUpgraded = dbMount.IsUpgraded
+        }
             );
-        
+
         var packetMountList = new PacketMountList
-            {
-                Mounts = player.Mounts
-            };
+        {
+            Mounts = player.Mounts
+        };
 
         player.SendTunneled(packetMountList);
         return true;
-        }
+    }
 
     private bool IsWinnable(Player player, RewardDropDefinition drop)
     {
@@ -258,17 +280,72 @@ public class RewardManager : IRewardManager
             return false;
         }
 
-        if (itemDefinition.Type is not 19)
+        if (itemDefinition.GenderUsage != 0 && itemDefinition.GenderUsage != player.Gender)
+            return false;
+
+        if (itemDefinition.Type == ItemDefinitionHelper.PetItemType)
+            return !OwnsPet(player, itemDefinition.Id);
+
+        if (itemDefinition.Type != ItemDefinitionHelper.MountItemType)
             return true;
-        
+
         if (item.Tints.Count == 0)
-            return !OwnsMount(player, itemDefinition.Param1, 0);
-    
+            return !OwnsMount(player, itemDefinition.Param1, GetDefaultMountTint(itemDefinition.Param1));
+
         return item.Tints.Any(x => !OwnsMount(player, itemDefinition.Param1, x.TintId));
+    }
+    private bool TryGrantPet(Player player, ClientItemDefinition itemDefinition, int tint)
+    {
+        if (!PetHelper.TryGetModel(_resourceManager, itemDefinition, out var modelDefinition))
+        {
+            _logger.LogError("Cannot grant pet {itemDefinitionId}, no model found.", itemDefinition.Id);
+            return false;
+        }
+
+        var characterId = GuidHelper.GetPlayerId(player.Guid);
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var dbCharacter = dbContext.Characters
+            .Include(character => character.Pets)
+            .SingleOrDefault(character => character.Id == characterId);
+
+        if (dbCharacter is null)
+            return false;
+
+        if (dbCharacter.Pets.Any(x => x.Definition == itemDefinition.Id))
+        {
+            _logger.LogWarning("Cannot grant duplicate pet {itemDefinitionId}, {player} already owns one.", itemDefinition.Id, player.Name.FullName);
+            return false;
+        }
+
+        var lastPetId = dbCharacter.Pets.Count > 0 ? dbCharacter.Pets.Max(x => x.Id) : 0;
+        var petTint = tint != 0 ? tint : itemDefinition.Icon.TintId;
+        var dbPet = PetHelper.CreatePet(++lastPetId, itemDefinition.Id, petTint);
+
+        dbCharacter.Pets.Add(dbPet);
+
+        if (dbContext.SaveChanges() <= 0)
+            return false;
+
+        PetHelper.AddPet(player, _resourceManager, dbPet, itemDefinition, modelDefinition);
+        player.PlayerPet.SendPetList();
+
+        return true;
+    }
+    private int GetDefaultMountTint(int mountDefinitionId)
+    {
+        if (!_resourceManager.Mounts.TryGetValue(mountDefinitionId, out var mountDefinition))
+            return 0;
+
+        return mountDefinition.TintId;
     }
     private static bool OwnsMount(Player player, int mountDefinitionId, int tint)
     {
         return player.Mounts.Any(x => x.Definition == mountDefinitionId && x.TintId == tint);
+    }
+    private static bool OwnsPet(Player player, int petItemDefinitionId)
+    {
+        return player.PetDefinitions.ContainsValue(petItemDefinitionId);
     }
 
     public bool TryGrantCurrency(Player player, CurrencyType currencyType, int amount)
@@ -330,7 +407,7 @@ public class RewardManager : IRewardManager
     private static void SendMountRewardToast(Player player, ClientItemDefinition itemDefinition, int tint, int quantity, ulong sourceGuid)
     //Answer to TODO: Yes, but we only know this one right now. Unknown1 appears to be part of Coins & XP Toasts. -Erwynne
     {
-         var clientItemDefinitions = new List<ClientItemDefinition> {itemDefinition};
+        var clientItemDefinitions = new List<ClientItemDefinition> { itemDefinition };
 
         using var writer = new PacketWriter();
 

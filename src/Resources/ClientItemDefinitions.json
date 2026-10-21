@@ -251389,14 +251389,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 92
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "bubblegum",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 952,
@@ -251411,14 +251411,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 118
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "concrete",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 953,
@@ -251433,14 +251433,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 96
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "mahogany",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 954,
@@ -251455,14 +251455,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 102
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "raincloud",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 955,
@@ -251477,14 +251477,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 107
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "sweetpea",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 956,
@@ -251499,14 +251499,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 119
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "timberwolf",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 957,
@@ -1268519,6 +1268519,89 @@
     "CategoryId": 101,
     "Rarity": 2,
     "IsTintable": true
+  },
+  {
+    "Comment": "Sunstone Clockwork Mystery Chest",
+    "Id": 79519,
+    "Type": 28,
+    "NameId": 19048,
+    "DescriptionId": 2663,
+    "Icon": {
+      "Id":7777
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Sci-Fi Mystery Chest",
+    "Id": 79520,
+    "Type": 28,
+    "NameId": 2662,
+    "DescriptionId": 2663,
+    "Icon": {
+      "Id":7723
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Seasonal Snow Days Mystery Chest",
+    "Id": 79521,
+    "Type": 28,
+    "NameId": 4419440,
+    "DescriptionId": 2663,
+    "Icon": {
+      "Id":8134
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Wonders Mystery Chest Chest of Wonders",
+    "Id": 79522,
+    "Type": 28,
+    "NameId": 442890,
+    "DescriptionId": 442901,
+    "Icon": {
+      "Id":8500
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  { 
+    "Comment": "Chest of Wonders Magical Scimitar",
+    "Id": 79523,
+    "Type": 1,
+    "NameId": 442891,
+    "DescriptionId": 442892,
+    "Icon": { 
+      "Id": 8502
+    },
+    "Class": 6,
+    "Slot": 7,
+    "CategoryId": 207,
+    "ModelName": "sword_ar_ag_weapon_scimitar.adr",
+    "WeaponTrailEffectId": 5485
   },
   {
     "Comment": "Jonin Ninja Gi",

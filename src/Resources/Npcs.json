@@ -41360,35 +41360,35 @@
     "ModelFileName": "mkt_cakes_vampire_01.adr"
   },
     {
-    "Id": 33085,
+    "Id": 40013,
     "NameId": 19048,
     "Name": "Clockwork Mystery Chest",
     "ModelId": 876,
     "ModelFileName": "sg_mystery_chest_03.adr"
   },
   {
-    "Id": 33086,
+    "Id": 40014,
     "NameId": 436403,
     "Name": "Mystery Chest",
     "ModelId": 1511,
     "ModelFileName": "sg_mystery_chest_01.adr"
   },
   {
-    "Id": 33087,
+    "Id": 40015,
     "NameId": 2662,
     "Name": "Sci-Fi Mystery Chest",
     "ModelId": 1512,
     "ModelFileName": "sg_mystery_chest_02.adr"
   },
   {
-    "Id": 33088,
+    "Id": 40016,
     "NameId": 4419440,
     "Name": "Snow Days Mystery Chest",
     "ModelId": 4135,
     "ModelFileName": "sg_mystery_chest_04.adr"
   },
   {
-    "Id": 33089,
+    "Id": 40017,
     "NameId": 442890,
     "Name": "Wonders Mystery Chest",
     "ModelId": 4460,
