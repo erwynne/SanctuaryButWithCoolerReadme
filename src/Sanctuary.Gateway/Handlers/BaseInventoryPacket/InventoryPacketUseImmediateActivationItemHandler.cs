@@ -142,6 +142,15 @@ public static class InventoryPacketUseImmediateActivationItemHandler
         EntityHelper.SetBaseAnimation(player, chestNpc, ChestOpenStand);
         EntityHelper.SetAnimation(player, chestNpc, ChestOpen);
 
+        var openCompositeEffect = 5597;
+
+        player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
+        {
+            Guid = chestNpc.Guid,
+            CompositeEffectId = openCompositeEffect,
+            Position = chestNpc.Position
+        }, true);
+
         var closeAt = Environment.TickCount64 + ChestCloseAfterMs;
         var despawnAt = Environment.TickCount64 + ChestDespawnAfterMs;
         var hasClosed = false;
@@ -159,7 +168,7 @@ public static class InventoryPacketUseImmediateActivationItemHandler
             if (!hasClosed && now >= closeAt)
             {
                 EntityHelper.SetBaseAnimation(player, chestNpc, ChestStand);
-                EntityHelper.SetAnimation(player, chestNpc, ChestShut); 
+                EntityHelper.SetAnimation(player, chestNpc, ChestShut);
                 hasClosed = true;
             }
         };
