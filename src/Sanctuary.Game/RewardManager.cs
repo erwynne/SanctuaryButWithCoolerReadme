@@ -429,7 +429,7 @@ public class RewardManager : IRewardManager
         packet.RewardBundle.PlayerGuid = player.Guid;
         packet.RewardBundle.IconId = itemDefinition.Icon.Id;
         packet.RewardBundle.NameId = itemDefinition.NameId;
-        packet.RewardBundle.Unknown3 = 16; //16 gives a mystery box panel
+        packet.RewardBundle.Unknown3 = 16; //16 gives a mystery box panel, which doesn't need to be for a classic item the way an item is an item is an item
         packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
         {
             IconId = itemDefinition.Icon.Id,

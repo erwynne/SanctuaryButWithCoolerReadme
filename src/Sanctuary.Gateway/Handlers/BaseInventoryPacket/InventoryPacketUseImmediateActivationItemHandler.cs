@@ -205,7 +205,9 @@ public static class InventoryPacketUseImmediateActivationItemHandler
         }
 
         // Chest loot is in Rewards.json under "mystery-chest-itemid" example Original Mystery Chest is currently "mystery-chest-78136".
-        // For future to add a chest, add its item and a reward table with that key, and add it to the dictionary
+        // For future to add a custom chest, add its item and a reward table with that key, and add it to the dictionary
+        //TODO: Does any of this work for an exploration chest? Spooktacular? Snow Days gifts? Are there other 'Use' items? I doubt this is the only one
+        //And when Groaxy figures out the animation, we will correct the animation.
         var rewardTableKey = $"mystery-chest-{clientItemDefinition.Id}";
         var clientKey = connection.Player.Items.FirstOrDefault(x => x.Definition == 78137);
 

@@ -11,6 +11,8 @@ using Sanctuary.Packet.Common.Attributes;
 namespace Sanctuary.Gateway.Handlers;
 
 [PacketHandler]
+
+//This file handles what happens when 'Use' is used. If Use does more than just mystery chests we will have to refactor this a bit
 public static class InventoryPacketCheckImmediateActivationItemHandler
 {
     private static ILogger _logger = null!;
